@@ -1,0 +1,33 @@
+graph TB
+    subgraph "1️⃣ ENTRÉE"
+        User[👤 Utilisateur]
+    end
+    
+    subgraph "2️⃣ RÉCUPÉRATION"
+        API[☁️ Open-Meteo<br/>3 APIs]
+    end
+    
+    subgraph "3️⃣ ANALYSE"
+        Algo[🤖 Algorithme<br/>Détection]
+    end
+    
+    subgraph "4️⃣ STOCKAGE"
+        DB[💾 Base de Données]
+    end
+    
+    subgraph "5️⃣ SORTIE"
+        Display[🖥️ Affichage]
+        Alert[📧 Alertes]
+    end
+    
+    User --> API
+    API --> Algo
+    Algo --> DB
+    DB --> Display
+    Algo --> Alert
+    Display --> User
+    Alert --> User
+    
+    style API fill:#e1f5ff
+    style Algo fill:#fff3e0
+    style Alert fill:#ffebee

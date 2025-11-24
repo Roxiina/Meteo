@@ -1,0 +1,9 @@
+graph LR
+    A[📍 Position<br/>lat=-20<br/>lon=55] --> B[➕ Variables<br/>vent<br/>pression<br/>SST]
+    B --> C[➕ Config<br/>10 jours<br/>horaire]
+    C --> D[🔗 URL Complète]
+    D --> E[📡 Envoi HTTP GET]
+    E --> F[📥 Réception JSON]
+    
+    style D fill:#e1f5ff
+    style F fill:#c8e6c9

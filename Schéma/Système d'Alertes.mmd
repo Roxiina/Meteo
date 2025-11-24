@@ -1,0 +1,14 @@
+graph LR
+    Detection[🔍 Détection] --> Level{Niveau<br/>Risque ?}
+    
+    Level -->|🔴 ÉLEVÉ| Critical[CYCLONE<br/>Email + SMS + Push]
+    Level -->|🟡 MOYEN| Warning[TEMPÊTE<br/>Email + Push]
+    Level -->|🟢 FAIBLE| Info[SURVEILLANCE<br/>Email seulement]
+    
+    Critical --> Users[👥 Utilisateurs]
+    Warning --> Users
+    Info --> Users
+    
+    style Critical fill:#ffcdd2
+    style Warning fill:#fff9c4
+    style Info fill:#c8e6c9

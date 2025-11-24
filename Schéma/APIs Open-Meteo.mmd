@@ -1,0 +1,15 @@
+graph TB
+    System[🔄 Système de Détection]
+    
+    System --> API1[☁️ Weather API<br/>Vent + Pression]
+    System --> API2[🌊 Marine API<br/>Température Mer]
+    System --> API3[📊 Ensemble API<br/>Incertitudes]
+    
+    API1 --> Result[📊 Résultat Final]
+    API2 --> Result
+    API3 --> Result
+    
+    style API1 fill:#e1f5ff
+    style API2 fill:#e1f5ff
+    style API3 fill:#e1f5ff
+    style Result fill:#c8e6c9

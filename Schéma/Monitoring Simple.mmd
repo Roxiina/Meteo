@@ -1,0 +1,23 @@
+graph TB
+    subgraph "📊 Ce qu'on Surveille"
+        M1[⏱️ Temps de Réponse<br/>< 5 secondes]
+        M2[❌ Taux d'Erreur<br/>< 1%]
+        M3[📈 Nombre Requêtes<br/>par jour]
+    end
+    
+    subgraph "🔔 Alertes Automatiques"
+        A1[Si lent → Email équipe]
+        A2[Si erreurs → SMS urgence]
+        A3[Si surchauffe → Alerte]
+    end
+    
+    M1 --> A1
+    M2 --> A2
+    M3 --> A3
+    
+    style M1 fill:#e1f5ff
+    style M2 fill:#e1f5ff
+    style M3 fill:#e1f5ff
+    style A1 fill:#ffebee
+    style A2 fill:#ffebee
+    style A3 fill:#ffebee

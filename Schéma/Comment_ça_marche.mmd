@@ -1,0 +1,14 @@
+graph LR
+    A[👤 Utilisateur] --> B[🌐 Application Web]
+    B --> C[🔄 Système]
+    C --> D[☁️ Open-Meteo API]
+    D --> C
+    C --> E[💾 Base de Données]
+    C --> B
+    B --> A
+    C --> F[📧 Alertes]
+    F --> A
+    
+    style D fill:#e1f5ff
+    style C fill:#fff3e0
+    style F fill:#ffebee

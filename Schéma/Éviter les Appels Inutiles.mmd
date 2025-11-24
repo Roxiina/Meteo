@@ -1,0 +1,12 @@
+graph TD
+    Request[📥 Nouvelle Requête] --> Check{Données en<br/>cache ?}
+    
+    Check -->|✅ Oui| Fast[⚡ Réponse Rapide<br/>< 1 seconde]
+    Check -->|❌ Non| Call[☁️ Appeler Open-Meteo<br/>~3 secondes]
+    
+    Call --> Save[💾 Sauvegarder<br/>Valide 6 heures]
+    Save --> Response[📤 Retourner Résultat]
+    Fast --> Response
+    
+    style Fast fill:#c8e6c9
+    style Call fill:#e1f5ff

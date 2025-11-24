@@ -1,0 +1,13 @@
+sequenceDiagram
+    participant U as 👤 Utilisateur
+    participant A as 🌐 Application
+    participant O as ☁️ Open-Meteo
+    participant D as 💾 Base de Données
+    
+    U->>A: Je veux voir les cyclones
+    A->>O: Demande météo (lat, lon)
+    O->>A: Données: vent, pression, SST
+    A->>A: Analyse: Cyclone détecté ?
+    A->>D: Sauvegarde résultat
+    A->>U: Affiche: CYCLONE DÉTECTÉ ⚠️
+    A->>U: Envoie alerte par email 📧

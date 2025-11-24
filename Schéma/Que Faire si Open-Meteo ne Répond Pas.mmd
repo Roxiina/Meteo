@@ -1,0 +1,16 @@
+flowchart TD
+    Call[☁️ Appel API] --> Response{Réponse ?}
+    
+    Response -->|✅ OK| Success[📊 Données Reçues]
+    Response -->|❌ Erreur| Retry[🔄 Réessayer<br/>3 fois]
+    
+    Retry --> Check{Succès ?}
+    Check -->|✅ Oui| Success
+    Check -->|❌ Non| Cache{Cache<br/>disponible ?}
+    
+    Cache -->|✅ Oui| OldData[📦 Données Anciennes<br/>avec Avertissement]
+    Cache -->|❌ Non| Error[❌ Erreur 503<br/>Service Indisponible]
+    
+    style Success fill:#c8e6c9
+    style OldData fill:#fff9c4
+    style Error fill:#ffcdd2
