@@ -510,8 +510,6 @@ Merci à :
 
 - **Nom** : Roxiina
 - **GitHub** : [@Roxiina](https://github.com/Roxiina)
-- **Email** : roxiina@example.com
-- **LinkedIn** : [linkedin.com/in/roxiina](https://linkedin.com/in/roxiina)
 
 ### Projet
 
