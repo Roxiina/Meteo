@@ -81,7 +81,8 @@ class WeatherService:
             "latitude": latitude,
             "longitude": longitude,
             "forecast_days": forecast_days,
-            "daily": ["temperature_2m_max", "temperature_2m_min", "pressure_msl", "wind_speed_10m_max"],
+            "daily": ["temperature_2m_max", "temperature_2m_min", "wind_speed_10m_max"],
+            "hourly": ["surface_pressure"],
             "timezone": "auto"
         }
         
@@ -135,7 +136,7 @@ class WeatherService:
         params = {
             "latitude": latitude,
             "longitude": longitude,
-            "current": ["temperature_2m", "pressure_msl", "wind_speed_10m"],
+            "current": ["temperature_2m", "surface_pressure", "wind_speed_10m"],
             "timezone": "auto"
         }
         
@@ -230,7 +231,6 @@ class WeatherService:
                 "time",
                 "temperature_2m_max",
                 "temperature_2m_min",
-                "pressure_msl",
                 "wind_speed_10m_max"
             ]
             
@@ -238,14 +238,26 @@ class WeatherService:
                 if field not in daily:
                     raise DataNotFoundError(f"Missing field in response: {field}")
             
+            # Get hourly pressure data and calculate daily averages
+            hourly = response.get("hourly", {})
+            hourly_pressure = hourly.get("surface_pressure", [])
+            
             # Build forecast list
             forecast_list = []
             for i in range(len(daily["time"])):
+                # Calculate average pressure for this day (24 hours)
+                start_hour = i * 24
+                end_hour = start_hour + 24
+                day_pressures = hourly_pressure[start_hour:end_hour]
+                # Filter out None values and calculate average
+                valid_pressures = [p for p in day_pressures if p is not None]
+                avg_pressure = sum(valid_pressures) / len(valid_pressures) if valid_pressures else None
+                
                 forecast_list.append({
                     "date": daily["time"][i],
                     "temperature_2m_max": daily["temperature_2m_max"][i],
                     "temperature_2m_min": daily["temperature_2m_min"][i],
-                    "surface_pressure": daily["pressure_msl"][i],
+                    "surface_pressure": avg_pressure,
                     "wind_speed_10m_max": daily["wind_speed_10m_max"][i]
                 })
             
@@ -289,7 +301,7 @@ class WeatherService:
             required_fields = [
                 "time",
                 "temperature_2m",
-                "pressure_msl",
+                "surface_pressure",
                 "wind_speed_10m"
             ]
             
@@ -305,7 +317,7 @@ class WeatherService:
                 "current": {
                     "time": current["time"],
                     "temperature_2m": current["temperature_2m"],
-                    "surface_pressure": current["pressure_msl"],
+                    "surface_pressure": current["surface_pressure"],
                     "wind_speed_10m": current["wind_speed_10m"]
                 }
             }

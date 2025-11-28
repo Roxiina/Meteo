@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyclone Tracker - Détection Cyclonique</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .preset-locations {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .preset-btn {
+            padding: 10px 15px;
+            background: #f5f5f5;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        .preset-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .detect-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .detect-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .detect-btn:active {
+            transform: translateY(0);
+        }
+
+        .detect-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result {
+            display: none;
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 12px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result.cyclone {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+        }
+
+        .result.storm {
+            background: linear-gradient(135deg, #ffa500 0%, #ff8c00 100%);
+            color: white;
+        }
+
+        .result.depression {
+            background: linear-gradient(135deg, #f9ca24 0%, #f0932b 100%);
+            color: white;
+        }
+
+        .result.none {
+            background: linear-gradient(135deg, #6bcf7f 0%, #45b7d1 100%);
+            color: white;
+        }
+
+        .result h2 {
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+
+        .severity {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+
+        .conditions {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .condition-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .condition-item:last-child {
+            border-bottom: none;
+        }
+
+        .condition-label {
+            font-weight: 600;
+        }
+
+        .condition-met {
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        .condition-not-met {
+            color: #ff6b6b;
+        }
+
+        .error {
+            display: none;
+            background: #ff6b6b;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌀 Cyclone Tracker</h1>
+            <p class="subtitle">Détection de conditions cycloniques en temps réel</p>
+        </header>
+
+        <div class="form-section">
+            <div class="form-group">
+                <label for="locationName">Nom de la localisation (optionnel)</label>
+                <input type="text" id="locationName" placeholder="Ex: La Réunion, Maurice...">
+            </div>
+
+            <div class="form-group">
+                <label for="latitude">Latitude</label>
+                <input type="number" id="latitude" step="0.0001" placeholder="Ex: -21.1151" required>
+            </div>
+
+            <div class="form-group">
+                <label for="longitude">Longitude</label>
+                <input type="number" id="longitude" step="0.0001" placeholder="Ex: 55.5364" required>
+            </div>
+
+            <div class="form-group">
+                <label>Localisations prédéfinies</label>
+                <div class="preset-locations">
+                    <button class="preset-btn" onclick="setLocation('La Réunion', -21.1151, 55.5364)">La Réunion</button>
+                    <button class="preset-btn" onclick="setLocation('Maurice', -20.1609, 57.5012)">Maurice</button>
+                    <button class="preset-btn" onclick="setLocation('Madagascar', -18.8792, 47.5079)">Madagascar</button>
+                    <button class="preset-btn" onclick="setLocation('Comores', -11.6986, 43.2551)">Comores</button>
+                </div>
+            </div>
+
+            <button class="detect-btn" onclick="detectCyclone()">Analyser la localisation</button>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 15px; color: #666;">Analyse en cours...</p>
+        </div>
+
+        <div class="result" id="result"></div>
+
+        <div class="error" id="error"></div>
+
+        <div class="footer">
+            <p>Brief 2 - Module d'Intégration API Open-Meteo</p>
+            <p>© 2025 Cyclone Tracker</p>
+        </div>
+    </div>
+
+    <script>
+        function setLocation(name, lat, lon) {
+            document.getElementById('locationName').value = name;
+            document.getElementById('latitude').value = lat;
+            document.getElementById('longitude').value = lon;
+        }
+
+        async function detectCyclone() {
+            const locationName = document.getElementById('locationName').value;
+            const latitude = parseFloat(document.getElementById('latitude').value);
+            const longitude = parseFloat(document.getElementById('longitude').value);
+
+            // Validate inputs
+            if (isNaN(latitude) || isNaN(longitude)) {
+                showError('Veuillez entrer des coordonnées valides');
+                return;
+            }
+
+            if (latitude < -90 || latitude > 90) {
+                showError('La latitude doit être entre -90 et 90');
+                return;
+            }
+
+            if (longitude < -180 || longitude > 180) {
+                showError('La longitude doit être entre -180 et 180');
+                return;
+            }
+
+            // Hide previous results/errors
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+            document.querySelector('.detect-btn').disabled = true;
+
+            try {
+                const response = await fetch('/api/detect', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        latitude: latitude,
+                        longitude: longitude,
+                        location_name: locationName || `${latitude}, ${longitude}`
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayResult(data);
+                } else {
+                    showError(data.error || 'Une erreur est survenue');
+                }
+            } catch (error) {
+                showError('Erreur de connexion au serveur: ' + error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                document.querySelector('.detect-btn').disabled = false;
+            }
+        }
+
+        function displayResult(data) {
+            const result = data.data;
+            const resultDiv = document.getElementById('result');
+            
+            // Determine category class
+            let categoryClass = 'none';
+            let icon = '✅';
+            if (result.category === 'Cyclone') {
+                categoryClass = 'cyclone';
+                icon = '🌀';
+            } else if (result.category === 'Tempête Tropicale') {
+                categoryClass = 'storm';
+                icon = '⛈️';
+            } else if (result.category === 'Dépression Tropicale') {
+                categoryClass = 'depression';
+                icon = '🌧️';
+            }
+
+            // Build conditions HTML
+            const conditions = result.conditions;
+            const conditionsHTML = `
+                <div class="condition-item">
+                    <span class="condition-label">Température de surface:</span>
+                    <span class="${conditions.sst.met ? 'condition-met' : 'condition-not-met'}">
+                        ${conditions.sst.value.toFixed(1)}°C (seuil: >${conditions.sst.threshold}°C)
+                        ${conditions.sst.met ? '✓' : '✗'}
+                    </span>
+                </div>
+                <div class="condition-item">
+                    <span class="condition-label">Pression:</span>
+                    <span class="${conditions.pressure.met ? 'condition-met' : 'condition-not-met'}">
+                        ${conditions.pressure.value.toFixed(1)} hPa (seuil: <${conditions.pressure.threshold} hPa)
+                        ${conditions.pressure.met ? '✓' : '✗'}
+                    </span>
+                </div>
+                <div class="condition-item">
+                    <span class="condition-label">Vitesse du vent:</span>
+                    <span class="${conditions.wind.met ? 'condition-met' : 'condition-not-met'}">
+                        ${conditions.wind.value.toFixed(1)} km/h (seuil: >${conditions.wind.threshold} km/h)
+                        ${conditions.wind.met ? '✓' : '✗'}
+                    </span>
+                </div>
+            `;
+
+            resultDiv.innerHTML = `
+                <div class="icon">${icon}</div>
+                <h2>${data.location_name}</h2>
+                <div class="severity">
+                    Catégorie: <strong>${result.category}</strong><br>
+                    Sévérité: <strong>${(result.severity_score * 100).toFixed(1)}%</strong>
+                </div>
+                <div>
+                    <strong>Coordonnées:</strong> ${result.location.latitude}, ${result.location.longitude}<br>
+                    <strong>Date d'analyse:</strong> ${result.details.analysis_date}
+                </div>
+                <div class="conditions">
+                    <h3 style="margin-bottom: 10px;">Conditions Météorologiques</h3>
+                    ${conditionsHTML}
+                </div>
+                <div style="margin-top: 15px; opacity: 0.9;">
+                    <strong>Températures:</strong><br>
+                    Maximum: ${result.details.temperature_max.toFixed(1)}°C | 
+                    Minimum: ${result.details.temperature_min.toFixed(1)}°C
+                </div>
+            `;
+
+            resultDiv.className = `result ${categoryClass}`;
+            resultDiv.style.display = 'block';
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = '❌ Erreur: ' + message;
+            errorDiv.style.display = 'block';
+        }
+
+        // Allow Enter key to trigger detection
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('input').forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        detectCyclone();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
