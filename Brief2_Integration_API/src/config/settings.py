@@ -66,6 +66,10 @@ class Settings:
         
         # Logging
         self.LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
+        self.LOG_FORMAT = os.getenv(
+            "LOG_FORMAT",
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        )
         self.LOG_FILE = os.getenv("LOG_FILE", "logs/cyclone_tracker.log")
         self.LOG_MAX_SIZE = int(os.getenv("LOG_MAX_SIZE", "10485760"))  # 10MB
         self.LOG_BACKUP_COUNT = int(os.getenv("LOG_BACKUP_COUNT", "5"))
@@ -137,7 +141,7 @@ class Settings:
         }
         
         print("\n" + "=" * 60)
-        print("⚙️  CYCLONE TRACKER CONFIGURATION")
+        print("CYCLONE TRACKER CONFIGURATION")
         print("=" * 60)
         
         for group_name, settings in config_groups.items():

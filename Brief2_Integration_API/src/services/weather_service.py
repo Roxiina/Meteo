@@ -81,7 +81,7 @@ class WeatherService:
             "latitude": latitude,
             "longitude": longitude,
             "forecast_days": forecast_days,
-            "daily": "temperature_2m_max,temperature_2m_min,surface_pressure,wind_speed_10m_max",
+            "daily": ["temperature_2m_max", "temperature_2m_min", "pressure_msl", "wind_speed_10m_max"],
             "timezone": "auto"
         }
         
@@ -135,7 +135,7 @@ class WeatherService:
         params = {
             "latitude": latitude,
             "longitude": longitude,
-            "current": "temperature_2m,surface_pressure,wind_speed_10m",
+            "current": ["temperature_2m", "pressure_msl", "wind_speed_10m"],
             "timezone": "auto"
         }
         
@@ -230,7 +230,7 @@ class WeatherService:
                 "time",
                 "temperature_2m_max",
                 "temperature_2m_min",
-                "surface_pressure",
+                "pressure_msl",
                 "wind_speed_10m_max"
             ]
             
@@ -245,7 +245,7 @@ class WeatherService:
                     "date": daily["time"][i],
                     "temperature_2m_max": daily["temperature_2m_max"][i],
                     "temperature_2m_min": daily["temperature_2m_min"][i],
-                    "surface_pressure": daily["surface_pressure"][i],
+                    "surface_pressure": daily["pressure_msl"][i],
                     "wind_speed_10m_max": daily["wind_speed_10m_max"][i]
                 })
             
@@ -289,7 +289,7 @@ class WeatherService:
             required_fields = [
                 "time",
                 "temperature_2m",
-                "surface_pressure",
+                "pressure_msl",
                 "wind_speed_10m"
             ]
             
@@ -305,7 +305,7 @@ class WeatherService:
                 "current": {
                     "time": current["time"],
                     "temperature_2m": current["temperature_2m"],
-                    "surface_pressure": current["surface_pressure"],
+                    "surface_pressure": current["pressure_msl"],
                     "wind_speed_10m": current["wind_speed_10m"]
                 }
             }

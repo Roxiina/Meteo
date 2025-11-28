@@ -1,0 +1,99 @@
+﻿2025-11-28 09:20:58,028 - __main__ - INFO - ======================================================================
+2025-11-28 09:20:58,028 - __main__ - INFO - CYCLONE TRACKER - Brief 2
+2025-11-28 09:20:58,028 - __main__ - INFO - ======================================================================
+C:/Users/flavi/OneDrive/Documents/Simplon/Projet/Meteo/.venv/Scripts/python.ex
+e : --- Logging error ---
+Au caractère Ligne:1 : 1
++ C:/Users/flavi/OneDrive/Documents/Simplon/Projet/Meteo/.venv/Scripts/ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (--- Logging error ---:String) [] 
+   , RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Traceback (most recent call last):
+  File "C:\Users\flavi\OneDrive\Documents\Simplon\Projet\Meteo\Brief2_Integrat
+ion_API\src\main.py", line 187, in <module>
+    main()
+    ~~~~^^
+  File "C:\Users\flavi\OneDrive\Documents\Simplon\Projet\Meteo\Brief2_Integrat
+ion_API\src\main.py", line 94, in main
+    settings.display()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\flavi\OneDrive\Documents\Simplon\Projet\Meteo\Brief2_Integrat
+ion_API\src\config\settings.py", line 144, in display
+    print("\u2699\ufe0f  CYCLONE TRACKER CONFIGURATION")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\flavi\AppData\Local\Programs\Python\Python313\Lib\encodings\c
+p1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: 
+character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\flavi\AppData\Local\Programs\Python\Python313\Lib\logging\__i
+nit__.py", line 1154, in emit
+    stream.write(msg + self.terminator)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\flavi\AppData\Local\Programs\Python\Python313\Lib\encodings\c
+p1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 
+637-638: character maps to <undefined>
+Call stack:
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\flavi\OneDrive\Documents\Simplon\Projet\Meteo\Brief2_Integrat
+ion_API\src\main.py", line 192, in <module>
+    logging.exception(f"Erreur fatale: {e}")
+Message: "Erreur fatale: 'charmap' codec can't encode characters in position 
+0-1: character maps to <undefined>"
+Arguments: ()
+--- Logging error ---
+Traceback (most recent call last):
+  File "C:\Users\flavi\OneDrive\Documents\Simplon\Projet\Meteo\Brief2_Integrat
+ion_API\src\main.py", line 187, in <module>
+    main()
+    ~~~~^^
+  File "C:\Users\flavi\OneDrive\Documents\Simplon\Projet\Meteo\Brief2_Integrat
+ion_API\src\main.py", line 94, in main
+    settings.display()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\flavi\OneDrive\Documents\Simplon\Projet\Meteo\Brief2_Integrat
+ion_API\src\config\settings.py", line 144, in display
+    print("\u2699\ufe0f  CYCLONE TRACKER CONFIGURATION")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\flavi\AppData\Local\Programs\Python\Python313\Lib\encodings\c
+p1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 0-1: 
+character maps to <undefined>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\flavi\AppData\Local\Programs\Python\Python313\Lib\logging\__i
+nit__.py", line 1154, in emit
+    stream.write(msg + self.terminator)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\flavi\AppData\Local\Programs\Python\Python313\Lib\encodings\c
+p1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 
+637-638: character maps to <undefined>
+Call stack:
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\flavi\OneDrive\Documents\Simplon\Projet\Meteo\Brief2_Integrat
+ion_API\src\main.py", line 192, in <module>
+    logging.exception(f"Erreur fatale: {e}")
+Message: "Erreur fatale: 'charmap' codec can't encode characters in position 
+0-1: character maps to <undefined>"
+Arguments: ()
+
+============================================================

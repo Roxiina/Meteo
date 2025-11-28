@@ -51,31 +51,31 @@ def display_results(location_name: str, detection_result: dict):
     print(f"Coordonnées: {location['latitude']}, {location['longitude']}")
     print(f"Date d'analyse: {detection_result['details']['analysis_date']}")
     
-    print(f"\n🌀 CATÉGORIE: {detection_result['category']}")
-    print(f"⚠️  Sévérité: {detection_result['severity_score']:.2%}")
+    print(f"\nCATEGORIE: {detection_result['category']}")
+    print(f"Severite: {detection_result['severity_score']:.2%}")
     
-    print("\n📊 CONDITIONS MÉTÉOROLOGIQUES:")
+    print("\nCONDITIONS METEOROLOGIQUES:")
     conditions = detection_result["conditions"]
     
     # SST
     sst = conditions["sst"]
-    status = "✅" if sst["met"] else "❌"
-    print(f"  {status} Température de surface: {sst['value']:.1f}°C (seuil: >{sst['threshold']:.1f}°C)")
+    status = "[OK]" if sst["met"] else "[NO]" 
+    print(f"  {status} Temperature de surface: {sst['value']:.1f}C (seuil: >{sst['threshold']:.1f}C)")
     
     # Pressure
     pressure = conditions["pressure"]
-    status = "✅" if pressure["met"] else "❌"
+    status = "[OK]" if pressure["met"] else "[NO]"
     print(f"  {status} Pression de surface: {pressure['value']:.1f} hPa (seuil: <{pressure['threshold']:.1f} hPa)")
     
     # Wind
     wind = conditions["wind"]
-    status = "✅" if wind["met"] else "❌"
+    status = "[OK]" if wind["met"] else "[NO]"
     print(f"  {status} Vitesse du vent: {wind['value']:.1f} km/h (seuil: >{wind['threshold']:.1f} km/h)")
     
-    print("\n🌡️  TEMPÉRATURES:")
+    print("\nTEMPERATURES:")
     details = detection_result["details"]
-    print(f"  Maximum: {details['temperature_max']:.1f}°C")
-    print(f"  Minimum: {details['temperature_min']:.1f}°C")
+    print(f"  Maximum: {details['temperature_max']:.1f}C")
+    print(f"  Minimum: {details['temperature_min']:.1f}C")
     
     print(f"{'=' * 70}\n")
 
@@ -91,10 +91,10 @@ def main():
     logger.info("=" * 70)
     
     # Display configuration
-    settings.display_config()
+    settings.display()
     
     # Initialize services
-    logger.info("\n📡 Initialisation des services...")
+    logger.info("\nInitialisation des services...")
     api_client = APIClient()
     weather_service = WeatherService(api_client)
     marine_service = MarineService(api_client)
@@ -116,7 +116,7 @@ def main():
     results = []
     for location in locations:
         try:
-            logger.info(f"\n🌍 Analyse de {location['name']}...")
+            logger.info(f"\nAnalyse de {location['name']}...")
             
             # Get weather data
             weather_data = weather_service.get_forecast(
@@ -151,16 +151,16 @@ def main():
             display_results(location["name"], detection_result)
         
         except ValidationError as e:
-            logger.error(f"❌ Erreur de validation pour {location['name']}: {e}")
-            print(f"\n❌ ERREUR: {e}\n")
+            logger.error(f"[X] Erreur de validation pour {location['name']}: {e}")
+            print(f"\n[X] ERREUR: {e}\n")
         
         except APIError as e:
-            logger.error(f"❌ Erreur API pour {location['name']}: {e}")
-            print(f"\n❌ ERREUR API: {e}\n")
+            logger.error(f"[X] Erreur API pour {location['name']}: {e}")
+            print(f"\n[X] ERREUR API: {e}\n")
         
         except Exception as e:
-            logger.exception(f"❌ Erreur inattendue pour {location['name']}: {e}")
-            print(f"\n❌ ERREUR INATTENDUE: {e}\n")
+            logger.exception(f"[X] Erreur inattendue pour {location['name']}: {e}")
+            print(f"\n[X] ERREUR INATTENDUE: {e}\n")
     
     # Summary
     print("\n" + "=" * 70)
@@ -172,21 +172,21 @@ def main():
         category = result["category"]
         severity = result["severity_score"]
         
-        icon = "🔴" if severity > 0.7 else "🟡" if severity > 0.4 else "🟢"
-        print(f"{icon} {item['location']}: {category} (Sévérité: {severity:.2%})")
+        icon = "[HIGH]" if severity > 0.7 else "[MED]" if severity > 0.4 else "[LOW]"
+        print(f"{icon} {item['location']}: {category} (Severite: {severity:.2%})")
     
     print("=" * 70)
     
     # Cleanup
     api_client.close()
-    logger.info("\n✅ Analyse terminée avec succès")
+    logger.info("\n[OK] Analyse terminee avec succes")
 
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\n\n⚠️  Programme interrompu par l'utilisateur")
+        print("\n\n[!] Programme interrompu par l'utilisateur")
         sys.exit(0)
     except Exception as e:
         logging.exception(f"Erreur fatale: {e}")

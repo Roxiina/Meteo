@@ -78,7 +78,7 @@ class MarineService:
         params = {
             "latitude": latitude,
             "longitude": longitude,
-            "daily": "wave_height_max,wave_direction_dominant,ocean_current_velocity,ocean_current_direction",
+            "daily": ["wave_height_max", "wave_direction_dominant", "ocean_current_velocity", "ocean_current_direction"],
             "timezone": "auto"
         }
         
@@ -136,7 +136,7 @@ class MarineService:
         params = {
             "latitude": latitude,
             "longitude": longitude,
-            "daily": "wave_height_max",
+            "daily": ["wave_height_max"],
             "timezone": "auto"
         }
         
