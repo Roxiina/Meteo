@@ -6,922 +6,131 @@
     <title>Cyclone Tracker - Détection Cyclonique</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <style>
-        :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-            --danger-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-            --glass-bg: rgba(255, 255, 255, 0.25);
-            --glass-border: rgba(255, 255, 255, 0.18);
-            --shadow-large: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            --text-primary: #1f2937;
-            --text-secondary: #6b7280;
-            --text-light: rgba(255, 255, 255, 0.9);
-        }
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-            background-size: 300% 300%;
-            animation: gradientShift 15s ease infinite;
-            min-height: 100vh;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .container {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            box-shadow: var(--shadow-large);
-            max-width: 900px;
-            width: 100%;
-            padding: 48px 40px;
-            position: relative;
-            z-index: 2;
-            transition: all 0.3s ease;
-        }
-
-        .container:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 32px 64px -12px rgba(0, 0, 0, 0.35);
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 48px;
-            position: relative;
-        }
-
-        h1 {
-            color: var(--text-light);
-            font-size: 3.5em;
-            font-weight: 700;
-            margin-bottom: 16px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-            letter-spacing: -0.025em;
-        }
-
-        .subtitle {
-            color: var(--text-light);
-            font-size: 1.3em;
-            font-weight: 300;
-            opacity: 0.9;
-            letter-spacing: 0.025em;
-        }
-
-        .form-section {
-            margin-bottom: 40px;
-        }
-
-        .form-grid {
-            display: grid;
-            gap: 24px;
-            margin-bottom: 32px;
-        }
-
-        .form-group {
-            position: relative;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        @media (max-width: 768px) {
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        label {
-            display: block;
-            margin-bottom: 12px;
-            color: var(--text-light);
-            font-weight: 600;
-            font-size: 0.95em;
-            letter-spacing: 0.025em;
-            text-transform: uppercase;
-            opacity: 0.9;
-        }
-
-        .input-wrapper {
-            position: relative;
-        }
-
-        .input-icon {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-light);
-            opacity: 0.7;
-            z-index: 1;
-        }
-
-        input[type="text"],
-        input[type="number"] {
-            width: 100%;
-            padding: 16px 16px 16px 48px;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 16px;
-            font-size: 1.1em;
-            font-weight: 500;
-            color: var(--text-light);
-            transition: all 0.3s ease;
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        input[type="text"]::placeholder,
-        input[type="number"]::placeholder {
-            color: rgba(255, 255, 255, 0.6);
-            font-family: 'Inter', sans-serif;
-            font-weight: 400;
-        }
-
-        input[type="text"]:focus,
-        input[type="number"]:focus {
-            outline: none;
-            background: rgba(255, 255, 255, 0.3);
-            border-color: rgba(255, 255, 255, 0.5);
-            box-shadow: 0 8px 32px rgba(255, 255, 255, 0.1);
-            transform: translateY(-2px);
-        }
-
-        .preset-locations {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 16px;
-            margin-top: 20px;
-        }
-
-        .preset-btn {
-            padding: 16px 20px;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 16px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.95em;
-            font-weight: 600;
-            color: var(--text-light);
-            position: relative;
-            overflow: hidden;
-            text-transform: uppercase;
-            letter-spacing: 0.025em;
-        }
-
-        .preset-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.6s ease;
-        }
-
-        .preset-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            border-color: rgba(255, 255, 255, 0.5);
-            transform: translateY(-3px);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
-        }
-
-        .preset-btn:hover::before {
-            left: 100%;
-        }
-
-        .preset-btn:active {
-            transform: translateY(-1px);
-        }
-
-        .detect-btn {
-            width: 100%;
-            padding: 20px 32px;
-            background: var(--primary-gradient);
-            color: white;
-            border: none;
-            border-radius: 20px;
-            font-size: 1.2em;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            position: relative;
-            overflow: hidden;
-            margin-top: 24px;
-        }
-
-        .detect-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.6s ease;
-        }
-
-        .detect-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.4);
-        }
-
-        .detect-btn:hover::before {
-            left: 100%;
-        }
-
-        .detect-btn:active {
-            transform: translateY(-1px);
-        }
-
-        .detect-btn:disabled {
-            background: rgba(255, 255, 255, 0.2);
-            cursor: not-allowed;
-            transform: none;
-            opacity: 0.6;
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            margin: 32px 0;
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        .spinner {
-            width: 60px;
-            height: 60px;
-            margin: 0 auto 20px;
-            position: relative;
-        }
-
-        .spinner::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top: 4px solid white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .loading p {
-            color: var(--text-light);
-            font-weight: 500;
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
-
-        .result {
-            display: none;
-            margin-top: 40px;
-            padding: 32px;
-            border-radius: 24px;
-            animation: resultSlideIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .result::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--primary-gradient);
-        }
-
-        @keyframes resultSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(40px) scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        .result.cyclone {
-            background: rgba(255, 107, 107, 0.2);
-            border-color: rgba(255, 107, 107, 0.3);
-            color: white;
-        }
-
-        .result.cyclone::before {
-            background: var(--danger-gradient);
-        }
-
-        .result.storm {
-            background: rgba(255, 165, 0, 0.2);
-            border-color: rgba(255, 165, 0, 0.3);
-            color: white;
-        }
-
-        .result.storm::before {
-            background: var(--warning-gradient);
-        }
-
-        .result.depression {
-            background: rgba(249, 202, 36, 0.2);
-            border-color: rgba(249, 202, 36, 0.3);
-            color: white;
-        }
-
-        .result.depression::before {
-            background: var(--secondary-gradient);
-        }
-
-        .result.none {
-            background: rgba(107, 207, 127, 0.2);
-            border-color: rgba(107, 207, 127, 0.3);
-            color: white;
-        }
-
-        .result.none::before {
-            background: var(--success-gradient);
-        }
-
-        .result h2 {
-            font-size: 2.5em;
-            margin-bottom: 20px;
-            font-weight: 700;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .severity {
-            font-size: 1.4em;
-            margin-bottom: 24px;
-            opacity: 0.95;
-            font-weight: 500;
-            line-height: 1.4;
-        }
-
-        .conditions {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            padding: 24px;
-            border-radius: 16px;
-            margin: 24px 0;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .conditions h3 {
-            font-size: 1.3em;
-            margin-bottom: 16px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .condition-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.3s ease;
-        }
-
-        .condition-item:hover {
-            background: rgba(255, 255, 255, 0.1);
-            padding-left: 12px;
-            margin: 0 -12px;
-            border-radius: 8px;
-        }
-
-        .condition-item:last-child {
-            border-bottom: none;
-        }
-
-        .condition-label {
-            font-weight: 600;
-            opacity: 0.9;
-        }
-
-        .condition-value {
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 500;
-        }
-
-        .condition-met {
-            color: #4ade80;
-            font-weight: 700;
-        }
-
-        .condition-not-met {
-            color: #f87171;
-            font-weight: 700;
-        }
-
-        .error {
-            display: none;
-            background: rgba(239, 68, 68, 0.2);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: white;
-            padding: 20px 24px;
-            border-radius: 16px;
-            margin-top: 24px;
-            font-weight: 500;
-            animation: errorShake 0.5s ease;
-        }
-
-        @keyframes errorShake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 48px;
-            color: var(--text-light);
-            font-size: 0.9em;
-            opacity: 0.8;
-            font-weight: 400;
-        }
-
-        .footer p:first-child {
-            font-weight: 500;
-            margin-bottom: 8px;
-        }
-
-        .icon {
-            font-size: 4em;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
-            animation: iconPulse 2s ease-in-out infinite;
-        }
-
-        @keyframes iconPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-top: 24px;
-        }
-
-        .stat-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(5px);
-            padding: 16px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            text-align: center;
-        }
-
-        .stat-card h4 {
-            font-size: 0.9em;
-            opacity: 0.8;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .stat-card .value {
-            font-size: 1.5em;
-            font-weight: 700;
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        /* Animations pour les éléments interactifs */
-        .form-group {
-            animation: formSlideIn 0.6s ease forwards;
-            opacity: 0;
-            transform: translateY(20px);
-        }
-
-        .form-group:nth-child(1) { animation-delay: 0.1s; }
-        .form-group:nth-child(2) { animation-delay: 0.2s; }
-        .form-group:nth-child(3) { animation-delay: 0.3s; }
-        .form-group:nth-child(4) { animation-delay: 0.4s; }
-
-        @keyframes formSlideIn {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .container {
-                padding: 32px 24px;
-                margin: 10px;
-            }
-
-            h1 {
-                font-size: 2.5em;
-            }
-
-            .subtitle {
-                font-size: 1.1em;
-            }
-
-            .preset-locations {
-                grid-template-columns: 1fr;
-            }
-
-            .result h2 {
-                font-size: 2em;
-            }
-
-            .icon {
-                font-size: 3em;
-            }
-        }
-    </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1><i class="fas fa-hurricane"></i> Cyclone Tracker</h1>
-            <p class="subtitle">Détection de conditions cycloniques en temps réel</p>
-        </header>
+    <!-- Header -->
+    <header class="site-header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-hurricane"></i>
+                <span>Cyclone Tracker</span>
+            </div>
+        </div>
+    </header>
 
-        <div class="form-section">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="locationName"><i class="fas fa-map-marker-alt"></i> Nom de la localisation</label>
-                    <div class="input-wrapper">
-                        <i class="fas fa-globe-americas input-icon"></i>
-                        <input type="text" id="locationName" placeholder="Ex: La Réunion, Maurice...">
-                    </div>
-                </div>
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <header>
+                <h1><i class="fas fa-hurricane"></i> Cyclone Tracker</h1>
+                <p class="subtitle">Détection de conditions cycloniques en temps réel</p>
+            </header>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="latitude"><i class="fas fa-crosshairs"></i> Latitude</label>
-                        <div class="input-wrapper">
-                            <i class="fas fa-map-pin input-icon"></i>
-                            <input type="number" id="latitude" step="0.0001" placeholder="Ex: -21.1151" required>
+            <div class="app-layout">
+                <!-- Section formulaire à gauche -->
+                <div class="form-section">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="locationName"><i class="fas fa-map-marker-alt"></i> Nom de la localisation</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-globe-americas input-icon"></i>
+                                <input type="text" id="locationName" placeholder="Ex: La Réunion, Maurice...">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="latitude"><i class="fas fa-crosshairs"></i> Latitude</label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-map-pin input-icon"></i>
+                                    <input type="number" id="latitude" step="0.0001" placeholder="Ex: -21.1151" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="longitude"><i class="fas fa-crosshairs"></i> Longitude</label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-map-pin input-icon"></i>
+                                    <input type="number" id="longitude" step="0.0001" placeholder="Ex: 55.5364" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-map-marked-alt"></i> Localisations prédéfinies</label>
+                            <div class="preset-locations">
+                                <button class="preset-btn" onclick="setLocation('La Réunion', -21.1151, 55.5364)">
+                                    <i class="fas fa-island-tropical"></i> La Réunion
+                                </button>
+                                <button class="preset-btn" onclick="setLocation('Maurice', -20.1609, 57.5012)">
+                                    <i class="fas fa-island-tropical"></i> Maurice
+                                </button>
+                                <button class="preset-btn" onclick="setLocation('Madagascar', -18.8792, 47.5079)">
+                                    <i class="fas fa-mountain"></i> Madagascar
+                                </button>
+                                <button class="preset-btn" onclick="setLocation('Comores', -11.6986, 43.2551)">
+                                    <i class="fas fa-island-tropical"></i> Comores
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="longitude"><i class="fas fa-crosshairs"></i> Longitude</label>
-                        <div class="input-wrapper">
-                            <i class="fas fa-map-pin input-icon"></i>
-                            <input type="number" id="longitude" step="0.0001" placeholder="Ex: 55.5364" required>
-                        </div>
-                    </div>
+                    <button class="detect-btn" onclick="detectCyclone()">
+                        <i class="fas fa-search"></i> Analyser la localisation
+                    </button>
                 </div>
 
-                <div class="form-group">
-                    <label><i class="fas fa-map-marked-alt"></i> Localisations prédéfinies</label>
-                    <div class="preset-locations">
-                        <button class="preset-btn" onclick="setLocation('La Réunion', -21.1151, 55.5364)">
-                            <i class="fas fa-island-tropical"></i> La Réunion
-                        </button>
-                        <button class="preset-btn" onclick="setLocation('Maurice', -20.1609, 57.5012)">
-                            <i class="fas fa-island-tropical"></i> Maurice
-                        </button>
-                        <button class="preset-btn" onclick="setLocation('Madagascar', -18.8792, 47.5079)">
-                            <i class="fas fa-mountain"></i> Madagascar
-                        </button>
-                        <button class="preset-btn" onclick="setLocation('Comores', -11.6986, 43.2551)">
-                            <i class="fas fa-island-tropical"></i> Comores
-                        </button>
+                <!-- Section résultats à droite -->
+                <div class="results-section">
+                    <div class="loading" id="loading">
+                        <div class="spinner"></div>
+                        <p><i class="fas fa-cloud-rain"></i> Analyse en cours...</p>
                     </div>
+
+                    <div class="result" id="result"></div>
+
+                    <div class="error" id="error"></div>
                 </div>
             </div>
-
-            <button class="detect-btn" onclick="detectCyclone()">
-                <i class="fas fa-search"></i> Analyser la localisation
-            </button>
         </div>
+    </main>
 
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p><i class="fas fa-cloud-rain"></i> Analyse en cours...</p>
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3><i class="fas fa-hurricane"></i> Cyclone Tracker</h3>
+                <p>Système avancé de détection et surveillance des cyclones tropicaux en temps réel.</p>
+                <p>Technologie basée sur l'analyse météorologique et océanographique.</p>
+            </div>
+            <div class="footer-section">
+                <h3><i class="fas fa-info-circle"></i> Services</h3>
+                <p><a href="#detection">Détection automatique</a></p>
+                <p><a href="#tracking">Suivi en temps réel</a></p>
+                <p><a href="#analysis">Analyse prédictive</a></p>
+                <p><a href="#alerts">Alertes précoces</a></p>
+            </div>
+            <div class="footer-section">
+                <h3><i class="fas fa-envelope"></i> Contact</h3>
+                <p>Email: contact@cyclonetracker.fr</p>
+                <p>Téléphone: +33 (0)1 23 45 67 89</p>
+                <p>Support technique: support@cyclonetracker.fr</p>
+            </div>
+            <div class="footer-section">
+                <h3><i class="fas fa-link"></i> Liens utiles</h3>
+                <p><a href="#documentation">Documentation API</a></p>
+                <p><a href="#meteofrance">Météo France</a></p>
+                <p><a href="#openmeteo">Open-Meteo</a></p>
+                <p><a href="#github">Code source</a></p>
+            </div>
         </div>
-
-        <div class="result" id="result"></div>
-
-        <div class="error" id="error"></div>
-
-        <div class="footer">
-            <p><i class="fas fa-code"></i> Brief 2 - Module d'Intégration API Open-Meteo</p>
-            <p>© 2025 Cyclone Tracker - Analyse météorologique avancée</p>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Cyclone Tracker. Développé avec ❤️ pour la sécurité maritime. Tous droits réservés.</p>
         </div>
-    </div>
-
-    <script>
-        // Animation d'entrée progressive
-        document.addEventListener('DOMContentLoaded', function() {
-            // Animer l'entrée du container
-            const container = document.querySelector('.container');
-            container.style.opacity = '0';
-            container.style.transform = 'scale(0.9) translateY(20px)';
-            
-            setTimeout(() => {
-                container.style.transition = 'all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-                container.style.opacity = '1';
-                container.style.transform = 'scale(1) translateY(0)';
-            }, 100);
-
-            // Ajouter des listeners pour Enter key
-            document.querySelectorAll('input').forEach(input => {
-                input.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        detectCyclone();
-                    }
-                });
-            });
-
-            // Effet de focus animé pour les inputs
-            document.querySelectorAll('input').forEach(input => {
-                input.addEventListener('focus', function() {
-                    this.parentElement.style.transform = 'scale(1.02)';
-                });
-                
-                input.addEventListener('blur', function() {
-                    this.parentElement.style.transform = 'scale(1)';
-                });
-            });
-        });
-
-        function setLocation(name, lat, lon) {
-            // Animation lors de la sélection
-            const inputs = [
-                document.getElementById('locationName'),
-                document.getElementById('latitude'),
-                document.getElementById('longitude')
-            ];
-            
-            inputs.forEach((input, index) => {
-                setTimeout(() => {
-                    input.style.transform = 'scale(1.05)';
-                    input.style.background = 'rgba(255, 255, 255, 0.4)';
-                    
-                    setTimeout(() => {
-                        input.style.transform = 'scale(1)';
-                        input.style.background = 'rgba(255, 255, 255, 0.2)';
-                    }, 200);
-                }, index * 100);
-            });
-            
-            document.getElementById('locationName').value = name;
-            document.getElementById('latitude').value = lat;
-            document.getElementById('longitude').value = lon;
-        }
-
-        async function detectCyclone() {
-            const locationName = document.getElementById('locationName').value;
-            const latitude = parseFloat(document.getElementById('latitude').value);
-            const longitude = parseFloat(document.getElementById('longitude').value);
-
-            // Validate inputs
-            if (isNaN(latitude) || isNaN(longitude)) {
-                showError('Veuillez entrer des coordonnées valides');
-                return;
-            }
-
-            if (latitude < -90 || latitude > 90) {
-                showError('La latitude doit être entre -90 et 90');
-                return;
-            }
-
-            if (longitude < -180 || longitude > 180) {
-                showError('La longitude doit être entre -180 et 180');
-                return;
-            }
-
-            // Hide previous results/errors
-            document.getElementById('result').style.display = 'none';
-            document.getElementById('error').style.display = 'none';
-            document.getElementById('loading').style.display = 'block';
-            
-            const detectBtn = document.querySelector('.detect-btn');
-            detectBtn.disabled = true;
-            detectBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyse en cours...';
-
-            try {
-                const response = await fetch('/api/detect', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        latitude: latitude,
-                        longitude: longitude,
-                        location_name: locationName || `${latitude}, ${longitude}`
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Erreur HTTP: ${response.status}`);
-                }
-
-                const data = await response.json();
-
-                if (data.success) {
-                    displayResult(data);
-                } else {
-                    showError(data.error || 'Une erreur est survenue lors de l\'analyse');
-                }
-            } catch (error) {
-                console.error('Erreur complète:', error);
-                showError('Erreur de connexion: ' + error.message);
-            } finally {
-                document.getElementById('loading').style.display = 'none';
-                detectBtn.disabled = false;
-                detectBtn.innerHTML = '<i class="fas fa-search"></i> Analyser la localisation';
-            }
-        }
-
-        function displayResult(data) {
-            const result = data.data;
-            const resultDiv = document.getElementById('result');
-            
-            // Determine category class
-            let categoryClass = 'none';
-            let icon = '<i class="fas fa-check-circle"></i>';
-            let statusText = 'Aucun risque cyclonique détecté';
-            
-            if (result.category === 'Cyclone') {
-                categoryClass = 'cyclone';
-                icon = '<i class="fas fa-hurricane"></i>';
-                statusText = 'CYCLONE DÉTECTÉ';
-            } else if (result.category === 'Tempête Tropicale') {
-                categoryClass = 'storm';
-                icon = '<i class="fas fa-bolt"></i>';
-                statusText = 'TEMPÊTE TROPICALE';
-            } else if (result.category === 'Dépression Tropicale') {
-                categoryClass = 'depression';
-                icon = '<i class="fas fa-cloud-rain"></i>';
-                statusText = 'DÉPRESSION TROPICALE';
-            }
-
-            // Build conditions HTML
-            const conditions = result.conditions;
-            const conditionsHTML = `
-                <div class="condition-item">
-                    <span class="condition-label">
-                        <i class="fas fa-thermometer-half"></i> Température de surface
-                    </span>
-                    <span class="condition-value ${conditions.sst.met ? 'condition-met' : 'condition-not-met'}">
-                        ${conditions.sst.value.toFixed(1)}°C 
-                        <small>(seuil: >${conditions.sst.threshold}°C)</small>
-                        ${conditions.sst.met ? '<i class="fas fa-check"></i>' : '<i class="fas fa-times"></i>'}
-                    </span>
-                </div>
-                <div class="condition-item">
-                    <span class="condition-label">
-                        <i class="fas fa-weight"></i> Pression atmosphérique
-                    </span>
-                    <span class="condition-value ${conditions.pressure.met ? 'condition-met' : 'condition-not-met'}">
-                        ${conditions.pressure.value.toFixed(1)} hPa 
-                        <small>(seuil: <${conditions.pressure.threshold} hPa)</small>
-                        ${conditions.pressure.met ? '<i class="fas fa-check"></i>' : '<i class="fas fa-times"></i>'}
-                    </span>
-                </div>
-                <div class="condition-item">
-                    <span class="condition-label">
-                        <i class="fas fa-wind"></i> Vitesse du vent
-                    </span>
-                    <span class="condition-value ${conditions.wind.met ? 'condition-met' : 'condition-not-met'}">
-                        ${conditions.wind.value.toFixed(1)} km/h 
-                        <small>(seuil: >${conditions.wind.threshold} km/h)</small>
-                        ${conditions.wind.met ? '<i class="fas fa-check"></i>' : '<i class="fas fa-times"></i>'}
-                    </span>
-                </div>
-            `;
-
-            // Calculer le score de confiance
-            let conditionsMet = 0;
-            if (conditions.sst.met) conditionsMet++;
-            if (conditions.pressure.met) conditionsMet++;
-            if (conditions.wind.met) conditionsMet++;
-            const confidenceScore = (conditionsMet / 3 * 100);
-
-            resultDiv.innerHTML = `
-                <div class="icon">${icon}</div>
-                <h2>${data.location_name}</h2>
-                <div class="severity">
-                    <strong>${statusText}</strong><br>
-                    <small>Score de sévérité: ${(result.severity_score * 100).toFixed(1)}% | Confiance: ${confidenceScore.toFixed(0)}%</small>
-                </div>
-                
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <h4><i class="fas fa-map-marker-alt"></i> Position</h4>
-                        <div class="value">${result.location.latitude.toFixed(3)}, ${result.location.longitude.toFixed(3)}</div>
-                    </div>
-                    <div class="stat-card">
-                        <h4><i class="fas fa-calendar-alt"></i> Analyse</h4>
-                        <div class="value">${new Date(result.details.analysis_date).toLocaleDateString('fr-FR')}</div>
-                    </div>
-                    <div class="stat-card">
-                        <h4><i class="fas fa-thermometer-three-quarters"></i> Temp. Max</h4>
-                        <div class="value">${result.details.temperature_max.toFixed(1)}°C</div>
-                    </div>
-                    <div class="stat-card">
-                        <h4><i class="fas fa-thermometer-quarter"></i> Temp. Min</h4>
-                        <div class="value">${result.details.temperature_min.toFixed(1)}°C</div>
-                    </div>
-                </div>
-
-                <div class="conditions">
-                    <h3><i class="fas fa-clipboard-check"></i> Conditions Météorologiques</h3>
-                    ${conditionsHTML}
-                </div>
-            `;
-
-            resultDiv.className = `result ${categoryClass}`;
-            resultDiv.style.display = 'block';
-            
-            // Scroll vers les résultats avec animation
-            setTimeout(() => {
-                resultDiv.scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'center' 
-                });
-            }, 100);
-        }
-
-        function showError(message) {
-            const errorDiv = document.getElementById('error');
-            errorDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Erreur: ' + message;
-            errorDiv.style.display = 'block';
-            
-            // Auto-hide error after 5 seconds
-            setTimeout(() => {
-                errorDiv.style.opacity = '0';
-                setTimeout(() => {
-                    errorDiv.style.display = 'none';
-                    errorDiv.style.opacity = '1';
-                }, 500);
-            }, 5000);
-        }
-    </script>
+    </footer>
+    
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

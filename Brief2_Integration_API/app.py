@@ -41,12 +41,15 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/api/detect', methods=['POST'])
+@app.route('/api/detect', methods=['GET', 'POST'])
 def detect_cyclone():
     """
     Detect cyclone conditions for a given location.
     
-    Expected JSON body:
+    GET: Returns API info and usage
+    POST: Performs cyclone detection
+    
+    Expected JSON body for POST:
     {
         "latitude": float,
         "longitude": float,
@@ -67,6 +70,28 @@ def detect_cyclone():
         "error": string (if success is false)
     }
     """
+    
+    # Handle GET request - return API info
+    if request.method == 'GET':
+        return jsonify({
+            "message": "Cyclone Tracker API",
+            "status": "operational",
+            "endpoint": "/api/detect",
+            "method": "POST",
+            "usage": {
+                "description": "Détecte les conditions cycloniques pour une localisation donnée",
+                "required_params": ["latitude", "longitude"],
+                "optional_params": ["location_name"],
+                "example": {
+                    "latitude": -21.1151,
+                    "longitude": 55.5364,
+                    "location_name": "La Réunion"
+                }
+            },
+            "frontend_url": "http://127.0.0.1:5000/"
+        })
+    
+    # Handle POST request - perform detection
     try:
         # Get request data
         data = request.get_json()
