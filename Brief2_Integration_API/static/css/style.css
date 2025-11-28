@@ -372,11 +372,12 @@ header h1 {
     border: 1px solid var(--border-glass);
     border-radius: var(--radius-2xl);
     padding: var(--spacing-2xl);
-    margin-bottom: var(--spacing-2xl);
+    margin-bottom: 0;
     box-shadow: var(--shadow-xl), 0 0 30px rgba(99, 102, 241, 0.15);
-    animation: slideInUp 0.8s ease-out 0.6s both;
+    animation: slideInLeft 0.8s ease-out 0.2s both;
     position: relative;
     overflow: hidden;
+    height: fit-content;
 }
 
 .form-grid {
@@ -589,9 +590,13 @@ input[type="number"]:focus + .input-icon {
     backdrop-filter: blur(24px);
     border: 1px solid var(--border-glass);
     border-radius: var(--radius-2xl);
-    margin-top: var(--spacing-xl);
-    animation: fadeInScale 0.6s ease-out;
+    margin-top: 0;
+    animation: slideInRight 0.8s ease-out 0.4s both;
     box-shadow: var(--shadow-xl);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
 }
 
 .spinner {
@@ -629,9 +634,9 @@ input[type="number"]:focus + .input-icon {
     border: 1px solid var(--border-glass);
     border-radius: var(--radius-2xl);
     padding: var(--spacing-2xl);
-    margin-top: var(--spacing-xl);
+    margin-top: 0;
     box-shadow: var(--shadow-xl), 0 0 30px rgba(34, 197, 94, 0.15);
-    animation: slideInUp 0.8s ease-out;
+    animation: slideInRight 0.8s ease-out 0.6s both;
     position: relative;
     overflow: hidden;
 }
@@ -644,11 +649,15 @@ input[type="number"]:focus + .input-icon {
     border: 2px solid rgba(239, 68, 68, 0.3);
     border-radius: var(--radius-xl);
     padding: var(--spacing-xl);
-    margin-top: var(--spacing-lg);
+    margin-top: 0;
     color: #ef4444;
     font-weight: 600;
-    animation: bounceIn 0.6s ease-out;
+    animation: slideInRight 0.8s ease-out 0.4s both;
     box-shadow: 0 8px 25px rgba(239, 68, 68, 0.2);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
 }
 
 /* Footer moderne */
@@ -723,11 +732,42 @@ input[type="number"]:focus + .input-icon {
 }
 
 /* Responsive Design Moderne */
+@media (max-width: 968px) {
+    .app-layout {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xl);
+    }
+
+    .results-section {
+        min-height: auto;
+    }
+
+    .loading, .result, .error {
+        position: relative;
+        margin-top: var(--spacing-lg);
+    }
+}
+
 @media (max-width: 768px) {
     .container {
         margin: var(--spacing-md);
         padding: var(--spacing-xl);
         border-radius: var(--radius-xl);
+        max-width: none;
+    }
+
+    .app-layout {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-lg);
+    }
+
+    .results-section {
+        min-height: auto;
+    }
+
+    .loading, .result, .error {
+        position: relative;
+        margin-top: var(--spacing-md);
     }
 
     header h1 {
