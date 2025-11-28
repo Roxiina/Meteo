@@ -101,21 +101,29 @@ function showResult(apiResponse) {
     const locationName = apiResponse.location_name;
     
     // Déterminer la couleur selon la sévérité
-    let severityColor = '#4bb543'; // Vert par défaut
-    if (result.severity_score > 0.7) severityColor = '#ff6b6b';
-    else if (result.severity_score > 0.4) severityColor = '#ffa500';
-    else if (result.severity_score > 0.2) severityColor = '#ffff00';
+    let severityColor = '#22c55e'; // Vert par défaut
+    let severityBg = 'rgba(34, 197, 94, 0.1)';
+    if (result.severity_score > 0.7) {
+        severityColor = '#ef4444';
+        severityBg = 'rgba(239, 68, 68, 0.1)';
+    } else if (result.severity_score > 0.4) {
+        severityColor = '#f59e0b';
+        severityBg = 'rgba(245, 158, 11, 0.1)';
+    } else if (result.severity_score > 0.2) {
+        severityColor = '#eab308';
+        severityBg = 'rgba(234, 179, 8, 0.1)';
+    }
     
     // Déterminer l'icône et le statut
-    let icon = '<i class="fas fa-check-circle"></i>';
+    let icon = '<i class="fas fa-check-circle" style="color: #22c55e;"></i>';
     let statusText = result.category;
     
     if (result.category.toLowerCase().includes('cyclone')) {
-        icon = '<i class="fas fa-hurricane"></i>';
+        icon = '<i class="fas fa-hurricane" style="color: #ef4444;"></i>';
     } else if (result.category.toLowerCase().includes('tempête')) {
-        icon = '<i class="fas fa-bolt"></i>';
+        icon = '<i class="fas fa-bolt" style="color: #f59e0b;"></i>';
     } else if (result.category.toLowerCase().includes('dépression')) {
-        icon = '<i class="fas fa-cloud-rain"></i>';
+        icon = '<i class="fas fa-cloud-rain" style="color: #6366f1;"></i>';
     }
     
     // Calculer les statistiques des conditions
@@ -123,62 +131,106 @@ function showResult(apiResponse) {
     const details = result.details;
     
     resultDiv.innerHTML = `
-        <div style="text-align: center; color: white;">
-            <div class="icon">${icon}</div>
-            <h2 style="color: ${severityColor}; margin-bottom: 1rem;">
-                ${statusText}
-            </h2>
-            <div style="margin-bottom: 1rem;">
-                <strong>Localisation:</strong> ${locationName}<br>
-                <small>Coordonnées: ${result.location.latitude.toFixed(4)}, ${result.location.longitude.toFixed(4)}</small>
+        <div class="result-header">
+            <div class="result-icon">${icon}</div>
+            <div class="result-title">
+                <h2 style="color: ${severityColor}; margin: 0; font-size: 1.5rem; font-weight: 800;">
+                    ${statusText}
+                </h2>
+                <p class="result-location">
+                    <i class="fas fa-map-marker-alt" style="color: #64748b;"></i>
+                    ${locationName}
+                </p>
+                <p class="result-coordinates">
+                    ${result.location.latitude.toFixed(4)}, ${result.location.longitude.toFixed(4)}
+                </p>
             </div>
-            
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin: 1.5rem 0;">
-                <div style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 10px;">
-                    <i class="fas fa-thermometer-half" style="color: #ff6b6b;"></i>
-                    <strong>Température SST:</strong> ${conditions.sst ? conditions.sst.value.toFixed(1) + '°C' : 'N/A'}
+        </div>
+        
+        <div class="metrics-grid">
+            <div class="metric-card temperature">
+                <div class="metric-icon">
+                    <i class="fas fa-thermometer-half"></i>
                 </div>
-                <div style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 10px;">
-                    <i class="fas fa-tachometer-alt" style="color: #4facfe;"></i>
-                    <strong>Pression:</strong> ${conditions.pressure ? conditions.pressure.value.toFixed(1) + ' hPa' : 'N/A'}
+                <div class="metric-content">
+                    <span class="metric-label">Température SST</span>
+                    <span class="metric-value">${conditions.sst ? conditions.sst.value.toFixed(1) + '°C' : 'N/A'}</span>
                 </div>
-                <div style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 10px;">
-                    <i class="fas fa-wind" style="color: #43e97b;"></i>
-                    <strong>Vitesse du vent:</strong> ${conditions.wind ? conditions.wind.value.toFixed(1) + ' km/h' : 'N/A'}
-                </div>
-                <div style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 10px;">
-                    <i class="fas fa-calendar-alt" style="color: #ffa500;"></i>
-                    <strong>Date d'analyse:</strong> ${details.analysis_date ? new Date(details.analysis_date).toLocaleDateString('fr-FR') : new Date().toLocaleDateString('fr-FR')}
-                </div>
-            </div>
-            
-            <div style="background: rgba(${severityColor === '#ff6b6b' ? '255,107,107' : severityColor === '#ffa500' ? '255,165,0' : severityColor === '#ffff00' ? '255,255,0' : '75,181,67'},0.2); padding: 1.5rem; border-radius: 15px; border: 2px solid ${severityColor};">
-                <h3 style="margin-bottom: 1rem;">Niveau de risque: ${Math.round(result.severity_score * 100)}%</h3>
-                <div style="background: rgba(255,255,255,0.2); border-radius: 20px; height: 20px; overflow: hidden;">
-                    <div style="background: ${severityColor}; height: 100%; width: ${result.severity_score * 100}%; border-radius: 20px; transition: width 1s ease;"></div>
+                <div class="metric-status ${conditions.sst?.met ? 'status-success' : 'status-warning'}">
+                    <i class="fas ${conditions.sst?.met ? 'fa-check' : 'fa-times'}"></i>
                 </div>
             </div>
             
-            ${conditions ? `
-            <div style="margin-top: 1.5rem; background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 10px;">
-                <h4>Conditions détaillées:</h4>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem; margin-top: 1rem; font-size: 0.9rem;">
-                    ${conditions.sst ? `
-                    <div>SST: ${conditions.sst.value.toFixed(1)}°C ${conditions.sst.met ? '✅' : '❌'}</div>
-                    ` : ''}
-                    ${conditions.pressure ? `
-                    <div>Pression: ${conditions.pressure.value.toFixed(1)} hPa ${conditions.pressure.met ? '✅' : '❌'}</div>
-                    ` : ''}
-                    ${conditions.wind ? `
-                    <div>Vent: ${conditions.wind.value.toFixed(1)} km/h ${conditions.wind.met ? '✅' : '❌'}</div>
-                    ` : ''}
+            <div class="metric-card pressure">
+                <div class="metric-icon">
+                    <i class="fas fa-tachometer-alt"></i>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Pression</span>
+                    <span class="metric-value">${conditions.pressure ? conditions.pressure.value.toFixed(1) + ' hPa' : 'N/A'}</span>
+                </div>
+                <div class="metric-status ${conditions.pressure?.met ? 'status-success' : 'status-warning'}">
+                    <i class="fas ${conditions.pressure?.met ? 'fa-check' : 'fa-times'}"></i>
                 </div>
             </div>
-            ` : ''}
+            
+            <div class="metric-card wind">
+                <div class="metric-icon">
+                    <i class="fas fa-wind"></i>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Vitesse du vent</span>
+                    <span class="metric-value">${conditions.wind ? conditions.wind.value.toFixed(1) + ' km/h' : 'N/A'}</span>
+                </div>
+                <div class="metric-status ${conditions.wind?.met ? 'status-success' : 'status-warning'}">
+                    <i class="fas ${conditions.wind?.met ? 'fa-check' : 'fa-times'}"></i>
+                </div>
+            </div>
+            
+            <div class="metric-card date">
+                <div class="metric-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="metric-content">
+                    <span class="metric-label">Date d'analyse</span>
+                    <span class="metric-value">${details.analysis_date ? new Date(details.analysis_date).toLocaleDateString('fr-FR') : new Date().toLocaleDateString('fr-FR')}</span>
+                </div>
+                <div class="metric-status status-info">
+                    <i class="fas fa-info"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="risk-assessment" style="background: ${severityBg}; border: 1px solid ${severityColor};">
+            <div class="risk-header">
+                <h3 style="margin: 0; color: ${severityColor}; font-size: 1.2rem; font-weight: 700;">
+                    <i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>
+                    Niveau de risque
+                </h3>
+                <span class="risk-percentage" style="color: ${severityColor}; font-size: 2rem; font-weight: 800;">
+                    ${Math.round(result.severity_score * 100)}%
+                </span>
+            </div>
+            <div class="risk-bar-container">
+                <div class="risk-bar-bg">
+                    <div class="risk-bar-fill" style="background: linear-gradient(90deg, ${severityColor}, ${severityColor}80); width: ${result.severity_score * 100}%;"></div>
+                </div>
+            </div>
+            <div class="risk-description">
+                ${getRiskDescription(result.severity_score)}
+            </div>
         </div>
     `;
     
     resultDiv.style.display = 'block';
+    
+    // Animation d'apparition des cartes métriques
+    setTimeout(() => {
+        const metricCards = document.querySelectorAll('.metric-card');
+        metricCards.forEach((card, index) => {
+            card.style.animation = `slideInUp 0.6s ease-out ${index * 0.1}s both`;
+        });
+    }, 100);
     
     // Scroll vers les résultats avec animation
     setTimeout(() => {
@@ -186,7 +238,17 @@ function showResult(apiResponse) {
             behavior: 'smooth', 
             block: 'center' 
         });
-    }, 100);
+    }, 300);
+}
+
+/**
+ * Obtenir la description du risque selon le score
+ */
+function getRiskDescription(score) {
+    if (score > 0.7) return '<i class="fas fa-shield-alt"></i> Risque élevé - Surveillance renforcée recommandée';
+    if (score > 0.4) return '<i class="fas fa-exclamation-circle"></i> Risque modéré - Vigilance nécessaire';
+    if (score > 0.2) return '<i class="fas fa-info-circle"></i> Risque faible - Conditions à surveiller';
+    return '<i class="fas fa-check-circle"></i> Conditions normales - Aucun risque détecté';
 }
 
 /**
