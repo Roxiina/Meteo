@@ -115,6 +115,8 @@ class CycloneDetector:
             temperature_min = first_day["temperature_2m_min"]
             surface_pressure = first_day["surface_pressure"]
             wind_speed = first_day["wind_speed_10m_max"]
+            # Extract wind gusts if available
+            wind_gusts = first_day.get("wind_gusts_10m_max", wind_speed * 1.5)  # Estimate if not available
             analysis_date = first_day["date"]
         
         except (KeyError, IndexError) as e:
@@ -137,8 +139,8 @@ class CycloneDetector:
                     f"SST not provided, using estimated value: {sst:.1f}°C"
                 )
         
-        # Analyze conditions
-        conditions = self._analyze_conditions(sst, surface_pressure, wind_speed)
+        # Analyze conditions (including wind gusts)
+        conditions = self._analyze_conditions(sst, surface_pressure, wind_speed, wind_gusts)
         
         # Calculate severity score and category
         severity_score = self._calculate_severity_score(conditions)
@@ -164,11 +166,54 @@ class CycloneDetector:
         
         return result
     
+    def get_risk_level_from_gusts(self, wind_gusts_kmh: float) -> tuple[str, str]:
+        """
+        Determine cyclone risk level based on wind gusts speed.
+        
+        Args:
+            wind_gusts_kmh: Wind gusts speed in km/h
+        
+        Returns:
+            Tuple of (risk_level, status_class)
+        """
+        if wind_gusts_kmh >= 120:
+            return "CYCLONE DÉTECTÉ", "status-danger"
+        elif wind_gusts_kmh >= 90:
+            return "ALERTE CYCLONE", "status-warning"
+        elif wind_gusts_kmh >= 70:
+            return "VIGILANCE RENFORCÉE", "status-caution"
+        elif wind_gusts_kmh >= 50:
+            return "SURVEILLANCE", "status-normal"
+        else:
+            return "CONDITIONS NORMALES", "status-safe"
+    
+    def get_gust_risk_message(self, wind_gusts_kmh: float) -> str:
+        """
+        Get detailed risk message based on wind gust speed.
+        
+        Args:
+            wind_gusts_kmh: Wind gusts speed in km/h
+        
+        Returns:
+            Detailed risk assessment message
+        """
+        if wind_gusts_kmh >= 120:
+            return "Rafales extrêmes détectées ! Formation cyclonique confirmée. Risque majeur pour les structures et la navigation."
+        elif wind_gusts_kmh >= 90:
+            return "Rafales très fortes observées. Conditions pré-cycloniques probables. Prudence maximale recommandée."
+        elif wind_gusts_kmh >= 70:
+            return "Rafales importantes. Surveillance météorologique renforcée nécessaire. Éviter les activités extérieures."
+        elif wind_gusts_kmh >= 50:
+            return "Rafales modérées détectées. Conditions météorologiques instables. Vigilance recommandée."
+        else:
+            return "Rafales faibles. Conditions météorologiques stables dans la zone d'analyse."
+    
     def _analyze_conditions(
         self,
         sst: float,
         pressure: float,
-        wind_speed: float
+        wind_speed: float,
+        wind_gusts: float
     ) -> Dict[str, Dict[str, Any]]:
         """
         Analyze meteorological conditions against thresholds.
@@ -177,10 +222,14 @@ class CycloneDetector:
             sst: Sea surface temperature in °C
             pressure: Surface pressure in hPa
             wind_speed: Wind speed in km/h
+            wind_gusts: Wind gusts speed in km/h
         
         Returns:
             Dictionary with condition analysis
         """
+        # Define wind gusts thresholds for cyclone detection
+        wind_gusts_threshold = 120.0  # km/h - Strong cyclone indication
+        
         conditions = {
             "sst": {
                 "value": sst,
@@ -196,6 +245,11 @@ class CycloneDetector:
                 "value": wind_speed,
                 "threshold": self.wind_threshold,
                 "met": wind_speed > self.wind_threshold
+            },
+            "wind_gusts": {
+                "value": wind_gusts,
+                "threshold": wind_gusts_threshold,
+                "met": wind_gusts >= wind_gusts_threshold
             }
         }
         
@@ -209,7 +263,8 @@ class CycloneDetector:
         - SST: normalized distance above threshold
         - Pressure: normalized distance below threshold
         - Wind: normalized distance above threshold
-        - Average of three normalized values
+        - Wind Gusts: normalized distance above threshold (weighted more heavily)
+        - Weighted average of four normalized values
         
         Args:
             conditions: Analyzed conditions
@@ -235,8 +290,14 @@ class CycloneDetector:
         wind_max = 250.0  # Category 5 hurricane
         wind_score = max(0, min(1, (wind_value - wind_threshold) / (wind_max - wind_threshold)))
         
-        # Average score
-        severity_score = (sst_score + pressure_score + wind_score) / 3.0
+        # Wind gusts score (0-1) - More heavily weighted
+        gusts_value = conditions["wind_gusts"]["value"]
+        gusts_threshold = conditions["wind_gusts"]["threshold"]
+        gusts_max = 300.0  # Extreme wind gusts
+        gusts_score = max(0, min(1, (gusts_value - gusts_threshold) / (gusts_max - gusts_threshold)))
+        
+        # Weighted average score (wind gusts have 2x weight due to cyclone significance)
+        severity_score = (sst_score + pressure_score + wind_score + (gusts_score * 2)) / 5.0
         
         return severity_score
     

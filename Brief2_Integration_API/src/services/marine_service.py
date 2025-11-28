@@ -41,7 +41,9 @@ class MarineService:
         self,
         latitude: float,
         longitude: float,
-        forecast_days: int = 7
+        forecast_days: int = 7,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Get marine weather forecast for a location.
@@ -81,6 +83,12 @@ class MarineService:
             "daily": ["wave_height_max", "wave_direction_dominant", "ocean_current_velocity", "ocean_current_direction"],
             "timezone": "auto"
         }
+        
+        # Add date parameters for historical analysis
+        if start_date and end_date:
+            params["start_date"] = start_date
+            params["end_date"] = end_date
+            logger.info(f"Historical marine data requested for {start_date} to {end_date}")
         
         # Add forecast_days parameter if API supports it (currently always 7 days)
         logger.info(

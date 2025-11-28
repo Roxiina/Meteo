@@ -42,7 +42,9 @@ class WeatherService:
         self,
         latitude: float,
         longitude: float,
-        forecast_days: int = 7
+        forecast_days: int = 7,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Get weather forecast for a location.
@@ -80,11 +82,18 @@ class WeatherService:
         params = {
             "latitude": latitude,
             "longitude": longitude,
-            "forecast_days": forecast_days,
-            "daily": ["temperature_2m_max", "temperature_2m_min", "wind_speed_10m_max"],
+            "daily": ["temperature_2m_max", "temperature_2m_min", "wind_speed_10m_max", "wind_gusts_10m_max"],
             "hourly": ["surface_pressure"],
             "timezone": "auto"
         }
+        
+        # Add date parameters for historical analysis
+        if start_date and end_date:
+            params["start_date"] = start_date
+            params["end_date"] = end_date
+            logger.info(f"Historical data requested for {start_date} to {end_date}")
+        else:
+            params["forecast_days"] = forecast_days
         
         logger.info(
             f"Fetching weather forecast for ({latitude}, {longitude}), "
@@ -234,6 +243,9 @@ class WeatherService:
                 "wind_speed_10m_max"
             ]
             
+            # wind_gusts_10m_max is optional
+            optional_fields = ["wind_gusts_10m_max"]
+            
             for field in required_fields:
                 if field not in daily:
                     raise DataNotFoundError(f"Missing field in response: {field}")
@@ -253,12 +265,21 @@ class WeatherService:
                 valid_pressures = [p for p in day_pressures if p is not None]
                 avg_pressure = sum(valid_pressures) / len(valid_pressures) if valid_pressures else None
                 
+                # Get wind gusts if available, otherwise estimate from wind speed
+                wind_gusts = None
+                if "wind_gusts_10m_max" in daily and daily["wind_gusts_10m_max"][i] is not None:
+                    wind_gusts = daily["wind_gusts_10m_max"][i]
+                elif daily["wind_speed_10m_max"][i] is not None:
+                    # Estimate wind gusts as 1.4x wind speed if not available
+                    wind_gusts = daily["wind_speed_10m_max"][i] * 1.4
+                
                 forecast_list.append({
                     "date": daily["time"][i],
                     "temperature_2m_max": daily["temperature_2m_max"][i],
                     "temperature_2m_min": daily["temperature_2m_min"][i],
                     "surface_pressure": avg_pressure,
-                    "wind_speed_10m_max": daily["wind_speed_10m_max"][i]
+                    "wind_speed_10m_max": daily["wind_speed_10m_max"][i],
+                    "wind_gusts_10m_max": wind_gusts
                 })
             
             return {

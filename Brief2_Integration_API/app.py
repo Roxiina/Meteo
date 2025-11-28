@@ -6,6 +6,7 @@ and serves the frontend web interface.
 """
 
 import logging
+from datetime import datetime
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 
@@ -106,6 +107,7 @@ def detect_cyclone():
         latitude = data.get('latitude')
         longitude = data.get('longitude')
         location_name = data.get('location_name', f"{latitude}, {longitude}")
+        analysis_date = data.get('analysis_date')  # New parameter for historical analysis
         
         # Validate parameters
         if latitude is None or longitude is None:
@@ -124,23 +126,56 @@ def detect_cyclone():
                 "error": "Invalid latitude or longitude format"
             }), 400
         
+        # Validate date if provided
+        historical_analysis = False
+        if analysis_date:
+            try:
+                parsed_date = datetime.fromisoformat(analysis_date)
+                historical_analysis = True
+                logger.info(f"Historical analysis requested for date: {analysis_date}")
+            except ValueError:
+                return jsonify({
+                    "success": False,
+                    "error": "Invalid date format. Use YYYY-MM-DD format."
+                }), 400
+        
         logger.info(f"Analyzing location: {location_name} ({latitude}, {longitude})")
+        if historical_analysis:
+            logger.info(f"Historical analysis for date: {analysis_date}")
         
-        # Get weather data
-        weather_data = weather_service.get_forecast(
-            latitude=latitude,
-            longitude=longitude,
-            forecast_days=7
-        )
-        
-        # Get marine data (optional)
-        marine_data = None
-        try:
-            marine_data = marine_service.get_marine_forecast(
+        # Get weather data (with date if historical)
+        if historical_analysis:
+            # Historical data with specific date
+            weather_data = weather_service.get_forecast(
+                latitude=latitude,
+                longitude=longitude,
+                start_date=analysis_date,
+                end_date=analysis_date
+            )
+        else:
+            weather_data = weather_service.get_forecast(
                 latitude=latitude,
                 longitude=longitude,
                 forecast_days=7
             )
+        
+        # Get marine data (optional)
+        marine_data = None
+        try:
+            if historical_analysis:
+                # Historical marine data with specific date
+                marine_data = marine_service.get_marine_forecast(
+                    latitude=latitude,
+                    longitude=longitude,
+                    start_date=analysis_date,
+                    end_date=analysis_date
+                )
+            else:
+                marine_data = marine_service.get_marine_forecast(
+                    latitude=latitude,
+                    longitude=longitude,
+                    forecast_days=7
+                )
         except Exception as e:
             logger.warning(f"Could not fetch marine data: {e}")
         
@@ -149,6 +184,15 @@ def detect_cyclone():
             weather_data=weather_data,
             marine_data=marine_data
         )
+        
+        # Add analysis type and date to result
+        if historical_analysis:
+            detection_result['details']['analysis_type'] = 'historical'
+            detection_result['details']['requested_date'] = analysis_date
+        else:
+            detection_result['details']['analysis_type'] = 'real_time'
+        
+        detection_result['details']['analysis_date'] = analysis_date if analysis_date else datetime.now().isoformat()
         
         logger.info(f"Detection complete: {detection_result['category']}")
         
