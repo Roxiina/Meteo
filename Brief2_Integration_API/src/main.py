@@ -1,0 +1,193 @@
+"""
+Cyclone Tracker - Demo Application
+
+This module demonstrates cyclone detection for multiple locations
+in the Indian Ocean region.
+"""
+
+import logging
+import sys
+from pathlib import Path
+
+from src.config.settings import settings
+from src.utils.api_client import APIClient
+from src.services.weather_service import WeatherService
+from src.services.marine_service import MarineService
+from src.services.cyclone_detector import CycloneDetector
+from src.utils.error_handler import APIError, ValidationError
+
+
+# Configure logging
+def setup_logging():
+    """Configure application logging."""
+    # Create logs directory if it doesn't exist
+    log_dir = Path("logs")
+    log_dir.mkdir(exist_ok=True)
+    
+    # Configure logging
+    logging.basicConfig(
+        level=getattr(logging, settings.LOG_LEVEL),
+        format=settings.LOG_FORMAT,
+        handlers=[
+            logging.FileHandler(log_dir / "cyclone_tracker.log"),
+            logging.StreamHandler(sys.stdout)
+        ]
+    )
+
+
+def display_results(location_name: str, detection_result: dict):
+    """
+    Display cyclone detection results in a formatted way.
+    
+    Args:
+        location_name: Name of the location
+        detection_result: Detection result from CycloneDetector
+    """
+    print(f"\n{'=' * 70}")
+    print(f"ANALYSE CYCLONIQUE - {location_name}")
+    print(f"{'=' * 70}")
+    
+    location = detection_result["location"]
+    print(f"Coordonnées: {location['latitude']}, {location['longitude']}")
+    print(f"Date d'analyse: {detection_result['details']['analysis_date']}")
+    
+    print(f"\n🌀 CATÉGORIE: {detection_result['category']}")
+    print(f"⚠️  Sévérité: {detection_result['severity_score']:.2%}")
+    
+    print("\n📊 CONDITIONS MÉTÉOROLOGIQUES:")
+    conditions = detection_result["conditions"]
+    
+    # SST
+    sst = conditions["sst"]
+    status = "✅" if sst["met"] else "❌"
+    print(f"  {status} Température de surface: {sst['value']:.1f}°C (seuil: >{sst['threshold']:.1f}°C)")
+    
+    # Pressure
+    pressure = conditions["pressure"]
+    status = "✅" if pressure["met"] else "❌"
+    print(f"  {status} Pression de surface: {pressure['value']:.1f} hPa (seuil: <{pressure['threshold']:.1f} hPa)")
+    
+    # Wind
+    wind = conditions["wind"]
+    status = "✅" if wind["met"] else "❌"
+    print(f"  {status} Vitesse du vent: {wind['value']:.1f} km/h (seuil: >{wind['threshold']:.1f} km/h)")
+    
+    print("\n🌡️  TEMPÉRATURES:")
+    details = detection_result["details"]
+    print(f"  Maximum: {details['temperature_max']:.1f}°C")
+    print(f"  Minimum: {details['temperature_min']:.1f}°C")
+    
+    print(f"{'=' * 70}\n")
+
+
+def main():
+    """Main application entry point."""
+    # Setup logging
+    setup_logging()
+    logger = logging.getLogger(__name__)
+    
+    logger.info("=" * 70)
+    logger.info("CYCLONE TRACKER - Brief 2")
+    logger.info("=" * 70)
+    
+    # Display configuration
+    settings.display_config()
+    
+    # Initialize services
+    logger.info("\n📡 Initialisation des services...")
+    api_client = APIClient()
+    weather_service = WeatherService(api_client)
+    marine_service = MarineService(api_client)
+    cyclone_detector = CycloneDetector()
+    
+    # Define locations to analyze (Indian Ocean region)
+    locations = [
+        {"name": "La Réunion", "lat": -21.1151, "lon": 55.5364},
+        {"name": "Maurice (Île)", "lat": -20.1609, "lon": 57.5012},
+        {"name": "Madagascar (Antananarivo)", "lat": -18.8792, "lon": 47.5079},
+        {"name": "Comores (Moroni)", "lat": -11.6986, "lon": 43.2551},
+    ]
+    
+    print("\n" + "=" * 70)
+    print("ANALYSE DE DÉTECTION CYCLONIQUE - OCÉAN INDIEN")
+    print("=" * 70)
+    
+    # Analyze each location
+    results = []
+    for location in locations:
+        try:
+            logger.info(f"\n🌍 Analyse de {location['name']}...")
+            
+            # Get weather data
+            weather_data = weather_service.get_forecast(
+                latitude=location["lat"],
+                longitude=location["lon"],
+                forecast_days=7
+            )
+            
+            # Get marine data (optional, for better accuracy)
+            try:
+                marine_data = marine_service.get_marine_forecast(
+                    latitude=location["lat"],
+                    longitude=location["lon"],
+                    forecast_days=7
+                )
+            except APIError as e:
+                logger.warning(f"Marine data unavailable: {e}")
+                marine_data = None
+            
+            # Detect cyclone conditions
+            detection_result = cyclone_detector.detect(
+                weather_data=weather_data,
+                marine_data=marine_data
+            )
+            
+            results.append({
+                "location": location["name"],
+                "result": detection_result
+            })
+            
+            # Display results
+            display_results(location["name"], detection_result)
+        
+        except ValidationError as e:
+            logger.error(f"❌ Erreur de validation pour {location['name']}: {e}")
+            print(f"\n❌ ERREUR: {e}\n")
+        
+        except APIError as e:
+            logger.error(f"❌ Erreur API pour {location['name']}: {e}")
+            print(f"\n❌ ERREUR API: {e}\n")
+        
+        except Exception as e:
+            logger.exception(f"❌ Erreur inattendue pour {location['name']}: {e}")
+            print(f"\n❌ ERREUR INATTENDUE: {e}\n")
+    
+    # Summary
+    print("\n" + "=" * 70)
+    print("RÉSUMÉ DE L'ANALYSE")
+    print("=" * 70)
+    
+    for item in results:
+        result = item["result"]
+        category = result["category"]
+        severity = result["severity_score"]
+        
+        icon = "🔴" if severity > 0.7 else "🟡" if severity > 0.4 else "🟢"
+        print(f"{icon} {item['location']}: {category} (Sévérité: {severity:.2%})")
+    
+    print("=" * 70)
+    
+    # Cleanup
+    api_client.close()
+    logger.info("\n✅ Analyse terminée avec succès")
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\n\n⚠️  Programme interrompu par l'utilisateur")
+        sys.exit(0)
+    except Exception as e:
+        logging.exception(f"Erreur fatale: {e}")
+        sys.exit(1)
